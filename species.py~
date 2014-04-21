@@ -3,4 +3,17 @@
 #
 #
 
+class species:
 
+    def __init__(self, products, sellers, priceMin):
+        '''Class initializer.
+        Input:
+            products:   A list of products, as strings of names. 
+                        The format "p#x" can be used to represent the x'th copy of product 'name'.
+                        Produt names should never inlcude the symbol "#".
+            sellers:    A dictionary of seller names mapping to 
+        '''
+        
+        return
+        
+        
