@@ -31,15 +31,15 @@ class Market:
         
         def assembleProducts(self, sellers):
             for s in sellers:
-            pMax = 0.0
-            for n,p,q in sellers[s]:
-                pMax += p*q
-                if n not in self.products:
-                    self.products[n] = []
-                self.products[n].append(s)
-                self.priceQuant[(s, n)] = (p, q)
-            if pMax < priceMin:
-                self.unSellers.append(s)    
+                pMax = 0.0
+                for n,p,q in sellers[s]:
+                    pMax += p*q
+                    if n not in self.products:
+                        self.products[n] = []
+                    self.products[n].append(s)
+                    self.priceQuant[(s, n)] = (p, q)
+                if pMax < priceMin:
+                    self.unSellers.append(s)    
         
         def makeName(p):
             i = p.find('#')
@@ -58,18 +58,39 @@ class Species:
         bits = ""
         for p in market.products:
             numSel = len(market.products[p])
-            bitLen = int(math.log(numSel),2)        
+            bitLen = math.log(numSel),2
+            bitLen = int(bitLen) + 1*( (bitLen - int(bitLen)) > 0)
             for i in range():
                 bits += str(randomBit())
         return ""
-    
-    
+
+
+def binToInt(bstr, intrange):
+    '''
+    Converts bstr, a string of zeroes and ones, into an integer
+        scaled by maximum string of that length to be within [0,intrange].
+    '''
+    pf = '0b'
+    maxstr = float(eval(pf+ len(bstr)*'1'))
+    flstr = float(eval(pf + bstr))
+    fl = (flstr/maxstr)*float(intrange)
+    i = int(round(fl))
+    return i
+        
     
 def randomBit():
     return int(random.random() < 0.5)
     
-    
-    
+'''    
+def test():
+    ir = 10
+    for i in range(16):
+        bs = bin(16+i)[3:]
+        #print bs
+        print binToInt(bs, ir)
+        
+test()    
+''' 
     
     
     
