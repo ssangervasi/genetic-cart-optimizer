@@ -116,19 +116,25 @@ class Species:
         return mapping
         
     def priceAndSat(self):
+        '''
+            Price is total price of items based on chosen sellers.
+            Satisfaction is the fraction of sellers used that met minimum price requirement.
+        '''
         sellerTotals = {}
         totalPrice = 0
+        totalNumSellers = 0
         for product in self.cart:
             seller = self.cart[product]
             value = self.market.priceQuant[(seller,product)][0]
             totalPrice += value
             if seller not in sellerTotals:
                 sellerTotals[seller] = 0
+                totalNumSellers += 1
             sellerTotals[seller] += value
         totalSat = 0
         for seller in sellerTotals:
             totalSat += (sellerTotals[seller] >= self.market.priceMin)
-        return totalPrice, totalSat
+        return totalPrice, (float(totalSat)/totalNumSellers)
     
     def calculateFitness(self, highestPrice):
         '''
@@ -163,7 +169,7 @@ class Species:
                 
     def mutate(self, bit):
         if random.random() < self.mutationProb:
-            return str(not(int(bit)))
+            return str(int(not(int(bit))))     #Check out that logic mmhmm
         return bit
    
    
@@ -174,6 +180,7 @@ class Population:
         self.popSize = popSize
         return
 
+    
     def initializeRandom(self, market):
         for i in range(self.popSize):
             self.species.append(Species(market, ''))
@@ -189,6 +196,16 @@ class Population:
             self.maxPrice = specPrice
         return
             
+    def displayPriceSat(self):
+        totalPrice = 0
+        totalSat = 0
+        print("Species\tPrice\tSatisfaction")
+        for s in range(len(self.species)):
+            totalPrice += self.species[s].totalPrice
+            totalSat += self.species[s].totalSatisfaction
+            print(str(s)+"\t$"+str(self.species[s].totalPrice)+"\t"+str(self.species[s].totalSatisfaction))
+        print("\nAverage\t" + str(float(totalPrice)/len(self.species)) + "\t" + str(float(totalSat)/len(self.species)))
+    
     def newGeneration(self):
         '''
             Used to produce a new population object from the currrent population.
@@ -252,7 +269,9 @@ class Population:
             for species in reproProb[prob]:
                 runningSum += prob
                 bounds[runningSum] = species
-        if runningSum != 1.0:
-            print "Probability error" #putting this in as a test for now
+        #if int(runningSum) != 1:
+        #    print "Probability error" #putting this in as a test for now
+        #    print "\t", runningSum, int(runningSum)
+        #That test turned out to be bad because of roundoff errors breaking equality
         return bounds
         
