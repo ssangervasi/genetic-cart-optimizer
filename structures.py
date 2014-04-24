@@ -68,10 +68,10 @@ class Species:
             self.bitString = self.uniformString()
         else:
             self.bitString = bstr
-        print "STR: ", self.bitString
+        #print "STR: ", self.bitString
         self.cart = self.mappingFromBits()
         self.totalPrice, self.totalSatisfaction = self.priceAndSat()
-        self.fitness = self.calculateFitness()
+        self.fitness = None
         return
         
     def uniformString(self):
@@ -130,7 +130,7 @@ class Species:
             totalSat += (sellerTotals[seller] >= self.market.priceMin)
         return totalPrice, totalSat
     
-    def calculateFitness(self):
+    def calculateFitness(self, highestPrice):
         '''
             This is the hard function. The trick is that satisfying a seller should be high
                 fitness factor, becaus you need all satisfied to purchase, but beyond this
@@ -140,8 +140,8 @@ class Species:
         '''           
         satCoef = 10.0
         priceCoef = 1.0
-        fitness = (satCoef*self.totalSatisfaction) + (priceCoef/self.totalPrice)
-        return fitness
+        fitness = (satCoef*self.totalSatisfaction) + priceCoef*(highestPrice/self.totalPrice)
+        self.fitness = fitness
     
     def reproduce(self, partner):
         if len(self.bitString) != len(partner.bitString):
@@ -166,23 +166,93 @@ class Species:
             return str(not(int(bit)))
         return bit
    
-def test():
-    cart = ["apples","oranges", "bananas"]
-    sellers = {"alpha":[("apples", 1.1, 1),("oranges",1.5,1)], "beta":[("bananas", 2.0, 2),("oranges",1.1,1)]}
-    pmin = 1.0
-    mark = Market(cart,sellers,pmin)
-    print " MmHmm"
-    sa = Species(mark, "")
-    print " Quite "
-    sb = Species(mark, "")
-    print " Yep "
-    ca, cb = sa.reproduce(sb)
-    print ca.bitString, ca.fitness
-    print cb.bitString, cb.fitness
+   
+class Population:
+    def __init__(self, popSize):
+        self.species = []
+        self.maxPrice = 0
+        self.popSize = popSize
+        return
+
+    def initializeRandom(self, market):
+        for i in range(self.popSize):
+            self.species.append(Species(market, ''))
+            specPrice = self.species[-1].totalPrice
+            if specPrice > self.maxPrice:
+                self.maxPrice = specPrice
+        return
+
+    def addSpecies(self, species):
+        self.species.append(species)
+        specPrice = self.species[-1].totalPrice
+        if specPrice > self.maxPrice:
+            self.maxPrice = specPrice
+        return
+            
+    def newGeneration(self):
+        '''
+            Used to produce a new population object from the currrent population.
+            Calls several helper functions to generate the probability of each species reproducing,
+            then generates a dictionary of upper bounds for choosing a species from a random number
+            that is uniform in [0,1].
+            Note that, from the Species class, each reproduction produces two offspring, so to
+            get a new generation of equal size there must be popSize/2 reproductions.
         
-test()    
-    
-    
-    
-    
-    
+        '''
+        reproProb = self.probFromFitness() #Map of fitness probabilities to list of species with that prob
+        probMap = self.probBounds(reproProb)
+        newGen = Population(self.popSize)
+        
+        #print probMap
+        for romanticEncounter in range(self.popSize/2):
+            romeo = self.itemFromProb(probMap)
+            juliette = self.itemFromProb(probMap)
+            kidA, kidB = romeo.reproduce(juliette)
+            newGen.addSpecies(kidA)
+            newGen.addSpecies(kidB)
+        return newGen
+                
+    def itemFromProb(self,boundMap):
+        chance = random.random()
+        toIter = boundMap.keys()
+        toIter.sort()
+        item = None
+        for edge in toIter:
+            if chance <= edge:
+                item = boundMap[edge]
+                break
+        return item
+
+        
+    def probFromFitness(self):
+        fitnessMap = {}
+#        fitnessOrder = []
+        totalFitness = 0
+        for s in self.species:
+            s.calculateFitness(self.maxPrice)
+            if not s.fitness in fitnessMap:
+                fitnessMap[s.fitness] = []
+                #fitnessOrder.append(s.fitness)
+            fitnessMap[s.fitness].append(s)
+            totalFitness += s.fitness
+#        fitnessOrder.sort(reverse=True)
+        normFitnessMap = {}
+        for f in fitnessMap:
+            normFitnessMap[float(f)/totalFitness] = fitnessMap[f]
+        return normFitnessMap
+
+    def probBounds(self, reproProb):
+        '''
+            Takes a dictionary of {probability:[species1, ...]} and returns a dictionary of
+            cummulative probability marks mapping to single species, {probabilityBound:species}
+        '''
+        bounds = {}
+        runningSum = 0
+        for prob in reproProb:
+            for species in reproProb[prob]:
+                runningSum += prob
+                bounds[runningSum] = species
+        if runningSum != 1.0:
+            print "Probability error" #putting this in as a test for now
+        return bounds
+        
