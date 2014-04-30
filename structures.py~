@@ -136,20 +136,21 @@ class Species:
             totalSat += (sellerTotals[seller] >= self.market.priceMin)
         return totalPrice, (float(totalSat)/totalNumSellers)
     
-    def calculateFitness(self, highestPrice):
+    def calculateFitness(self, satCoef, priceCoef, lowestPrice):
         '''
             This is the hard function. The trick is that satisfying a seller should be high
                 fitness factor, becaus you need all satisfied to purchase, but beyond this
                 you need to reward minimizing the price.
             This will probably have to be tuned depending on problem.
             Maybe these coefficients should be an input?
+            
+            Update April 29: yes, the coefficients are now an input passed into this function
         '''           
-        satCoef = 10.0
-        priceCoef = 1.0
-        fitness = (satCoef*self.totalSatisfaction) + priceCoef*(highestPrice/self.totalPrice)
+        fitness = (satCoef*self.totalSatisfaction) + priceCoef*(lowestPrice/self.totalPrice)
         self.fitness = fitness
+        return
     
-    def reproduce(self, partner):
+    def reproduce(self, partner, cross = False):
         if len(self.bitString) != len(partner.bitString):
             return None, None
         numCuts = len(self.bitString) - 1
@@ -157,7 +158,7 @@ class Species:
         child1 = ""
         child2 = ""
         for i in range(len(self.bitString)):
-            if i <= numCuts:
+            if i <= numCuts or (not cross):
                 child1 += self.mutate(self.bitString[i])
                 child2 += partner.mutate(partner.bitString[i])
             else:
@@ -176,8 +177,11 @@ class Species:
 class Population:
     def __init__(self, popSize):
         self.species = []
-        self.maxPrice = 0
+        self.lowestPrice = float('inf')
         self.popSize = popSize
+        self.satCoef = 10.0
+        self.priceCoef = 1.0
+        self.crossProb = 0.3
         return
 
     
@@ -185,15 +189,15 @@ class Population:
         for i in range(self.popSize):
             self.species.append(Species(market, ''))
             specPrice = self.species[-1].totalPrice
-            if specPrice > self.maxPrice:
-                self.maxPrice = specPrice
+            if specPrice < self.lowestPrice:
+                self.lowestPrice = specPrice
         return
 
     def addSpecies(self, species):
         self.species.append(species)
         specPrice = self.species[-1].totalPrice
-        if specPrice > self.maxPrice:
-            self.maxPrice = specPrice
+        if specPrice < self.lowestPrice:
+            self.lowestPrice = specPrice
         return
             
     def displayPriceSat(self):
@@ -224,7 +228,8 @@ class Population:
         for romanticEncounter in range(self.popSize/2):
             romeo = self.itemFromProb(probMap)
             juliette = self.itemFromProb(probMap)
-            kidA, kidB = romeo.reproduce(juliette)
+            crossGenes = random.random()<self.crossProb
+            kidA, kidB = romeo.reproduce(juliette, cross = crossGenes)
             newGen.addSpecies(kidA)
             newGen.addSpecies(kidB)
         return newGen
@@ -246,7 +251,7 @@ class Population:
 #        fitnessOrder = []
         totalFitness = 0
         for s in self.species:
-            s.calculateFitness(self.maxPrice)
+            s.calculateFitness(self.satCoef, self.priceCoef, self.lowestPrice)
             if not s.fitness in fitnessMap:
                 fitnessMap[s.fitness] = []
                 #fitnessOrder.append(s.fitness)

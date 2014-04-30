@@ -32,7 +32,7 @@ def testLargeData(data = None):
     pmin = 1.0
     mark = Market(cart,sellers,pmin)
     print "Solvable? ", mark.satisfiable
-    firstGen = Population(50)
+    firstGen = Population(20)
     firstGen.initializeRandom(mark)
     newGen = firstGen.newGeneration()
     sys.stdout.write( "Evolving\n[")

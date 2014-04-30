@@ -47,23 +47,25 @@ def makeSellers(cart=None, priceList = None, sellerList = None, pAv = 0.50, pVar
     
 def dataStore(cart, sellers, fileName):
     path = fileName[0:fileName.find(".")]
-    realName = path+".pyc"
+    realName = path+".py"
     f = open(realName, 'w')
     f.write("#This is a data file for genetic-cart-optimizer\n\n")
-    f.write(realName + "Cart = "+str(cart)+"\n")
-    f.write(realName + "Sellers = "+ str(sellers) + "\n")
+    f.write("Cart = "+str(cart)+"\n")
+    f.write("Sellers = "+ str(sellers) + "\n")
     f.close()
     return True
     
 def makeData(fileName = None):
-    cart = makeCart
+    cart = makeCart()
     sellers = makeSellers()
     if fileName == None:
         return cart, sellers
     dataStore(cart, sellers, fileName)
     return cart, sellers
     
-makeData(fileName = "April29")
+    
+    
+makeData(fileName = "April29.pyc")
 
 
 
