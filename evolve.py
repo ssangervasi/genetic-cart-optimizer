@@ -35,12 +35,23 @@ def testLargeData(data = None):
     firstGen = Population(50)
     firstGen.initializeRandom(mark)
     newGen = firstGen.newGeneration()
-    sys.stdout.write( "Evolving\n[")
-    for i in range(1000):
+    
+    numGens = 1000
+    fivePercent = numGens/20
+    twentyPercent = numGens/5
+    fiftyPercent = numGens/2
+    print ( "Evolving\n" + "[" + " "*20 + "]")
+    for i in range( numGens):
         newGen = newGen.newGeneration()
-        if i%20 == 0:
+        if i == 0:
+            sys.stdout.write('[')
+        elif i %fiftyPercent == 0:
+            sys.stdout.write("|")
+        elif i %twentyPercent == 0:
             sys.stdout.write("=")
-            sys.stdout.flush()
+        elif i%(fivePercent) == 0:
+            sys.stdout.write("-")
+        sys.stdout.flush()
     sys.stdout.write("]\n")
     print("First Gen")
     firstGen.displayPriceSat()    
