@@ -11,7 +11,7 @@ def makeCart(numItems = 30):
         items.append("Item_"+str(i+1))
     return items
     
-def makeSellers(cart=None, priceList = None, sellerList = None, pAv = 0.50, pVar = 0.25, pMin = 1.0, solvable = True):
+def makeSellers(cart=None, priceList = None, sellerList = None, pAv = 0.50, pVar = 0.25, pMin = 1.0, satisfiable = True):
     if cart == None:
         cart = makeCart()
         numItems = 30
@@ -33,14 +33,24 @@ def makeSellers(cart=None, priceList = None, sellerList = None, pAv = 0.50, pVar
         added = 0
         for i in range(inventSize):
             item = random.choice(cart)
+            sellerPrice = 0.0
             if not item in inventDict:
                 inventDict[item] = added
                 added += 1
-                price  = pAv + 2*(random.random()-0.5)*pVar*pAv
+                if satisfiable and sellerPrice < pMin and i== inventSize - 1:
+                    price = pMin - sellerPrice
+                else:    
+                    price  = pAv + 2*(random.random()-0.5)*pVar*pAv
+                sellerPrice += price
                 sellers[seller].append( (item, price, 1) )
             else:
                 tupAsList = list( sellers[seller][inventDict[item]])
-                tupAsList[2] += 1
+                tupAsList[2] += 1   #Increase quantity
+                if satisfiable and sellerPrice < pMin and i== inventSize - 1:
+                    price = (pMin - sellerPrice)/tupAsList[2]
+                    sellerPrice += pMin
+                    tupAsList[1] = price
+                sellerPrice += tupAsList[1] #Increase total price
                 sellers[seller][inventDict[item]] = tuple(tupAsList)
     #For now I'm not worrying about solvability, but it should be encorperated.
     return sellers
@@ -65,7 +75,7 @@ def makeData(fileName = None):
     
     
     
-makeData(fileName = "April29.pyc")
+makeData(fileName = "April30.py")
 
 
 

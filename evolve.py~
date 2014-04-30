@@ -44,7 +44,7 @@ def testLargeData(data = None):
     for i in range( numGens):
         newGen = newGen.newGeneration()
         if i == 0:
-            system.stdout.write('[')
+            sys.stdout.write('[')
         elif i %fiftyPercent == 0:
             sys.stdout.write("|")
         elif i %twentyPercent == 0:
