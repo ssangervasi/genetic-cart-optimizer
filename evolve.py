@@ -31,25 +31,28 @@ def testLargeData(data = None):
     sellers = April30.Sellers
     pmin = 1.0
     mark = Market(cart,sellers,pmin)
-    print "Solvable? ", mark.satisfiable
-    firstGen = Population(50)
+    print "Satisfiable? ", mark.satisfiable
+    firstGen = Population(64)
     firstGen.initializeRandom(mark)
     newGen = firstGen.newGeneration()
     
-    numGens = 1000
+    numGens = 100000
+    onePercent = numGens/100
     fivePercent = numGens/20
     twentyPercent = numGens/5
     fiftyPercent = numGens/2
-    print ( "Evolving\n" + "[" + " "*20 + "]")
+    print ( "Evolving\n" + "[" + " "*100 + "]")
     for i in range( numGens):
         newGen = newGen.newGeneration()
         if i == 0:
             sys.stdout.write('[')
         elif i %fiftyPercent == 0:
-            sys.stdout.write("|")
+            sys.stdout.write("||")
         elif i %twentyPercent == 0:
             sys.stdout.write("=")
         elif i%(fivePercent) == 0:
+            sys.stdout.write("~")
+        elif i%(onePercent) == 0:
             sys.stdout.write("-")
         sys.stdout.flush()
     sys.stdout.write("]\n")
