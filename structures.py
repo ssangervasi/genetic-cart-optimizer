@@ -71,7 +71,7 @@ class Species:
         #print "STR: ", self.bitString
         self.cart = self.mappingFromBits()
         self.totalPrice, self.totalSatisfaction = self.priceAndSat()
-        self.fitness = None
+        self.fitness = -1
         return
         
     def uniformString(self):
@@ -200,15 +200,28 @@ class Population:
             self.lowestPrice = specPrice
         return
             
-    def displayPriceSat(self):
+    def populationFeatures(self, echo = False):
         totalPrice = 0
         totalSat = 0
-        print("Species\tPrice\tSatisfaction")
+        totalFit = 0
+        if echo:
+            print("Species\tPrice\tSatisfaction\tFitness")
+        avPrice = 0
+        avSat = 0
+        r = 4
         for s in range(len(self.species)):
-            totalPrice += self.species[s].totalPrice
-            totalSat += self.species[s].totalSatisfaction
-            print(str(s)+"\t$"+str(self.species[s].totalPrice)+"\t"+str(self.species[s].totalSatisfaction))
-        print("\nAverage\t" + str(float(totalPrice)/len(self.species)) + "\t" + str(float(totalSat)/len(self.species)))
+            totalPrice += round(self.species[s].totalPrice,r)
+            totalSat += round(self.species[s].totalSatisfaction,r)
+            totalFit += round(self.species[s].fitness,r)
+            if echo:
+                print(str(s)+"\t$"+str(round(self.species[s].totalPrice,r))+"\t"+str(round(self.species[s].totalSatisfaction,r))+"\t"+str(round(self.species[s].fitness,r)))
+        avPrice = round(float(totalPrice)/len(self.species),r)
+        avSat = round(float(totalSat)/len(self.species),r)
+        avFit = round(float(totalFit)/len(self.species), r)
+        if echo:
+            print("\nAverage\t" + str(avPrice) + "\t" + str(avSat) + "\t" + str(avFit))
+        return avPrice, avSat, avFit
+
     
     def newGeneration(self):
         '''
@@ -225,7 +238,7 @@ class Population:
         newGen = Population(self.popSize)
         
         #print probMap
-        for romanticEncounter in range(self.popSize/2):
+        for romanticEncounter in range(int(self.popSize/2)+(self.popSize%2)):
             romeo = self.itemFromProb(probMap)
             juliette = self.itemFromProb(probMap)
             crossGenes = random.random()<self.crossProb
@@ -236,7 +249,7 @@ class Population:
                 
     def itemFromProb(self,boundMap):
         chance = random.random()
-        toIter = boundMap.keys()
+        toIter = list(boundMap.keys()) #need to ensure this works in python 2 and 3 equally well
         toIter.sort()
         item = None
         for edge in toIter:

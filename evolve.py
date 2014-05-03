@@ -5,64 +5,63 @@
 
 from structures import *
 from generateData import *
-import sys 
-import April30
+import sys
+#This imports the data file. Need a smoother way of doing this input.
+import May3 as DataSet
 
-def test():
-    cart = ["apples","oranges", "bananas"]
-    sellers = {"alpha":[("apples", 1.1, 1),("oranges",3.5,1)], "beta":[("bananas", 1.0, 2),("oranges",3.1,1)], "gamma":[("bananas", 3.0, 2),("oranges",1.1,1)]}
-    pmin = 2.0
-    mark = Market(cart,sellers,pmin)
-    
-    firstGen = Population(10)
-    firstGen.initializeRandom(mark)
-    newGen = firstGen.newGeneration()
-    for i in range(50):
-        newGen = newGen.newGeneration()
-    print("First Gen")
-    firstGen.displayPriceSat()    
-    print("Last Gen")
-    newGen.displayPriceSat()
-    return
-    
         
-def testLargeData(data = None):
-    cart = April30.Cart
-    sellers = April30.Sellers
+def testLargeData(numGens = 100000):
+    cart = DataSet.Cart
+    sellers = DataSet.Sellers
     pmin = 1.0
     mark = Market(cart,sellers,pmin)
-    print "Satisfiable? ", mark.satisfiable
+    print ("Satisfiable? ", mark.satisfiable)
     firstGen = Population(64)
     firstGen.initializeRandom(mark)
-    newGen = firstGen.newGeneration()
+    prevGen = firstGen.newGeneration()
+    prevAvFit = firstGen.populationFeatures()[-1]
+    newAvFit = prevAvFit
     
-    numGens = 100000
     onePercent = numGens/100
     fivePercent = numGens/20
     twentyPercent = numGens/5
     fiftyPercent = numGens/2
     print ( "Evolving\n" + "[" + " "*100 + "]")
+    outString = ""
     for i in range( numGens):
-        newGen = newGen.newGeneration()
+        newGen = prevGen.newGeneration()
+        
         if i == 0:
             sys.stdout.write('[')
+            outString += '['
         elif i %fiftyPercent == 0:
             sys.stdout.write("||")
+            outString += '||'
         elif i %twentyPercent == 0:
             sys.stdout.write("=")
+            outString += '='
         elif i%(fivePercent) == 0:
             sys.stdout.write("~")
+            outString += '~'
+            newAvFit = prevGen.populationFeatures()[-1]
+            perChangeFit = round(100.0*(newAvFit-prevAvFit)/float(prevAvFit),4)
+            prevAvFit = newAvFit
+            if perChangeFit >= 5:
+                sys.stdout.write("\nSignificant Fitness Increase: " +str(perChangeFit)+"%  At Gen: " + str(i)+"\n"+outString)
         elif i%(onePercent) == 0:
             sys.stdout.write("-")
+            outString += '-'
         sys.stdout.flush()
+        prevGen = newGen
     sys.stdout.write("]\n")
     print("First Gen")
-    firstGen.displayPriceSat()    
+    firstGen.populationFeatures(echo = True)    
     print("Last Gen")
-    newGen.displayPriceSat()
+    newGen.newGeneration() #Fitenss only updated on redproduction
+    newGen.populationFeatures(echo = True)
     return    
     
-testLargeData()
-    
+#testLargeData()
+testLargeData(numGens = 500)   
     
     
