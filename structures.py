@@ -73,6 +73,10 @@ class Species:
         self.totalPrice, self.totalSatisfaction = self.priceAndSat()
         self.fitness = -1
         return
+
+    def sortKey(self):
+        #Function for sorting. Seemed to be best done by fitness, might use satisfaction instead.
+        return self.fitness
         
     def uniformString(self):
         bits = ""
@@ -208,7 +212,7 @@ class Population:
             print("Species\tPrice\tSatisfaction\tFitness")
         avPrice = 0
         avSat = 0
-        r = 4
+        r = 2
         for s in range(len(self.species)):
             totalPrice += round(self.species[s].totalPrice,r)
             totalSat += round(self.species[s].totalSatisfaction,r)
@@ -292,4 +296,18 @@ class Population:
         #    print "\t", runningSum, int(runningSum)
         #That test turned out to be bad because of roundoff errors breaking equality
         return bounds
-        
+
+    def sortByFitness(self):
+        self.species = sorted(self.species, key = Species.sortKey, reverse = True)
+        return
+
+    def writeToFile(self, fileName):
+        f = open(fileName+".txt", 'w')
+        f.write("#Population Output File\n")
+        f.write("Price\tSatisfaction\tFitness\tBitString\tSellers\n")
+        self.newGeneration()
+        self.sortByFitness()
+        for spec in self.species:
+            f.write(str(spec.totalPrice)+"\t"+str(spec.totalSatisfaction)+"\t"+str(spec.fitness)+"\t"+str(spec.bitString)+"\t"+str(spec.cart)+"\n")
+        f.close()
+        return fileName+".txt"

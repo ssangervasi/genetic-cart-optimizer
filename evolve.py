@@ -55,10 +55,13 @@ def testLargeData(numGens = 100000):
         prevGen = newGen
     sys.stdout.write("]\n")
     print("First Gen")
+    firstGen.sortByFitness()
     firstGen.populationFeatures(echo = True)    
     print("Last Gen")
     newGen.newGeneration() #Fitenss only updated on redproduction
+    newGen.sortByFitness()
     newGen.populationFeatures(echo = True)
+    newGen.writeToFile("testOutput")
     return    
     
 #testLargeData()
