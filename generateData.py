@@ -47,7 +47,8 @@ def makeSellers(cart=None, priceList = None, sellerList = None, pAv = 0.50, pVar
                 tupAsList = list( sellers[seller][inventDict[item]])
                 tupAsList[2] += 1   #Increase quantity
                 if satisfiable and sellerPrice < pMin and i== inventSize - 1:
-                    price = (pMin - sellerPrice)/tupAsList[2]
+                    #price = (pMin - sellerPrice)/tupAsList[2] #Does not satisfy when quantity is ignored.
+                    price = pMin - sellerPrice
                     sellerPrice += pMin
                     tupAsList[1] = price
                 sellerPrice += tupAsList[1] #Increase total price
