@@ -10,7 +10,7 @@ import sys
 import May3 as DataSet
 
         
-def testLargeData(numGens = 100000):
+def testLargeData(numGens = 10000):
     cart = DataSet.Cart
     sellers = DataSet.Sellers
     pmin = 1.0

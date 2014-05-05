@@ -19,12 +19,12 @@ class Market:
         '''Class initializer.
         Input:
             cart:   A list of products, as strings of names. 
-                        The format "p#x" can be used to represent the x'th copy of product 'name'.
-                        Produt names should never inlcude the symbol "#".
             sellers:    A dictionary of seller names mapping to a list of (product name, price, quantity) tuples indicating the seller's inventory.
             priceMin:   Universal minimum price. Implementation may allow this to become seller-dependent.
             
             Output:     None, this is an initilizer.
+
+            Note: Items are currently assumed to be unique, i.e. the quantity element of each seller is ignored. An implementation that generalizes for non-unique quantities may come later.
         '''
         self.priceMin = priceMin
         self.products = {}
